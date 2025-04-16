@@ -69,6 +69,19 @@ class Chatbot {
 	}
 
 	/**
+	 * @description Faz uma pergunta ao usuário
+	 * @param {string} question - A pergunta a ser feita
+	 * @return {Promise<string>} - A resposta do usuário
+	 * */
+	ask(question) {
+		return new Promise((resolve) => {
+			this.rl.question(question, (answer) => {
+				resolve(answer);
+			});
+		});
+	}
+
+	/**
 	 * @description Manipulador para o estado de saudação
 	 * @return {void}
 	 * */
