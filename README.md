@@ -4,11 +4,11 @@ Um chatbot interativo de linha de comando que permite consultar informações de
 
 ## Pré-requisitos
 
-- [Node.js](https://nodejs.org/) (v14 ou superior)
+- [Node.js](https://nodejs.org/) (v18+)
 
   Ou
 
-- [Docker](https://www.docker.com/) (opcional, se desejar executar com Docker)
+- [Docker](https://www.docker.com/)
 
 ## Opções de Execução
 
