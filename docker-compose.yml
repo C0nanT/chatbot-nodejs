@@ -1,6 +1,10 @@
 services:
   chatbot:
-    build: .
+    build: 
+      context: .
+      args:
+        - USER_ID=${UID:-1000}
+        - GROUP_ID=${GID:-1000}
     container_name: chatbot-nodejs
     volumes:
       - ./logs:/app/logs
@@ -12,3 +16,4 @@ services:
       - "3000:3000"
     environment:
       - NODE_ENV=development
+    user: ${UID:-1000}:${GID:-1000}

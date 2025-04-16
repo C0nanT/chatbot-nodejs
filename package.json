@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:docker": "docker compose up -d && docker exec -it chatbot-nodejs bash -c 'npm start'"
+    "start:docker": "docker compose up -d && docker exec -it chatbot-nodejs bash -c 'npm start'",
+    "fix-permissions": "sudo chown -R $USER:$USER ."
   },
   "keywords": [],
   "author": "",
