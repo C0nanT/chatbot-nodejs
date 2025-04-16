@@ -111,6 +111,8 @@ class Chatbot {
 		});
 	}
 
+	/**
+	 * @description Manipulador para o estado de Saudação
 	 * @return {void}
 	 * */
 	async handleGreeting() {
