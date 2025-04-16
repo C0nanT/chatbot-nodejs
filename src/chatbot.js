@@ -44,9 +44,7 @@ class Chatbot {
 	 * */
 	start() {
 		console.clear();
-		console.log(chalk.blue.bold("=================================="));
-		console.log(chalk.blue.bold("             CHATBOT"));
-		console.log(chalk.blue.bold("=================================="));
+		console.log(chalk.bgBlueBright.bold("             CHATBOT             "));
 
 		this.stateManager.transition("GREETING");
 		this.processCurrentState();
