@@ -1,9 +1,11 @@
 const { ApiService } = require("../services/api-service");
+const { LogManager } = require("./log-manager");
 
 class WeatherManager {
     constructor() {
         this.city = "";
-		this.apiService = new ApiService();
+        this.apiService = new ApiService();
+        this.logManager = new LogManager();
     }
     
     /**
@@ -13,6 +15,7 @@ class WeatherManager {
      */
     setCity(city) {
         this.city = city;
+        this.logManager.logAccess(`Cidade definida para consulta de clima: ${city}`);
     }
 
     /**
@@ -29,33 +32,45 @@ class WeatherManager {
      * @return {Promise<Object>} - Os dados climáticos correspondentes à cidade
      * */
     async getWeatherData(){
-        const coordinates = await this.apiService.getCoordinates(this.getCity());
-        if (coordinates.error) {
-            return coordinates;
-        }
-
-        const weatherData = await this.apiService.getWeather(coordinates.latitude, coordinates.longitude);
+        this.logManager.logAccess(`Iniciando consulta de clima para a cidade: ${this.getCity()}`);
         
-        if (weatherData.error) {
-            return weatherData;
+        try {
+            const coordinates = await this.apiService.getCoordinates(this.getCity());
+            if (coordinates.error) {
+                this.logManager.logError(`Cidade não encontrada: ${this.getCity()}`);
+                return coordinates;
+            }
+
+            this.logManager.logAccess(`Coordenadas obtidas para ${this.getCity()}: lat ${coordinates.latitude}, long ${coordinates.longitude}`);
+            
+            const weatherData = await this.apiService.getWeather(coordinates.latitude, coordinates.longitude);
+            
+            if (weatherData.error) {
+                this.logManager.logError(`Erro ao obter dados climáticos para ${this.getCity()}`);
+                return weatherData;
+            }
+
+            const timezoneOffset = weatherData.timezone_offset_seconds / 3600;
+            const currentDate = new Date();
+            const currentHour = (currentDate.getUTCHours() + timezoneOffset) % 24;
+            const is_night = currentHour < 6 || currentHour > 18;
+            const weather = {
+                city: this.getCity(),
+                latitude: coordinates.latitude,
+                longitude: coordinates.longitude,
+                current_temperature: weatherData.current.temperature_2m,
+                max_temperature: weatherData.daily.temperature_2m_max[0],
+                min_temperature: weatherData.daily.temperature_2m_min[0],
+                condition: this.getWeatherCondition(weatherData.current.weather_code, is_night),
+                is_night: is_night,
+            };
+
+            this.logManager.logAccess(`Consulta de clima concluída com sucesso para: ${this.getCity()}`);
+            return weather;
+        } catch (error) {
+            this.logManager.logError(`Erro na consulta de clima: ${error.message}`);
+            throw error;
         }
-
-        const timezoneOffset = weatherData.timezone_offset_seconds / 3600;
-        const currentDate = new Date();
-        const currentHour = (currentDate.getUTCHours() + timezoneOffset) % 24;
-        const is_night = currentHour < 6 || currentHour > 18;
-        const weather = {
-            city: this.getCity(),
-            latitude: coordinates.latitude,
-            longitude: coordinates.longitude,
-            current_temperature: weatherData.current.temperature_2m,
-            max_temperature: weatherData.daily.temperature_2m_max[0],
-            min_temperature: weatherData.daily.temperature_2m_min[0],
-            condition: this.getWeatherCondition(weatherData.current.weather_code, is_night),
-            is_night: is_night,
-        };
-
-        return weather;
     }
 
 	/**

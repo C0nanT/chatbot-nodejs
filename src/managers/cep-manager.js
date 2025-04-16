@@ -1,7 +1,10 @@
+const { LogManager } = require("./log-manager.js");
+
 class CepManager {
     constructor() {
         this.isValid = false;
         this.cep = "";
+        this.logManager = new LogManager();
     }
     
     /**
@@ -22,6 +25,7 @@ class CepManager {
      */
     setCep(cep) {
         this.cep = cep.replace(/\D/g, '');
+        this.logManager.logAccess(`CEP definido: ${this.cep}`);
     }
 
     /**

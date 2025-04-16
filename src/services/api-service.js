@@ -19,12 +19,14 @@ class ApiService {
 	async consultCep(cep) {
 		try {
 			const formattedCep = cep.replace(/\D/g, "");
+			this.logManager.logAccess(`Iniciando consulta de CEP: ${formattedCep}`);
 
 			const response = await axios.get(
 				`${this.viaCepBaseUrl}/${formattedCep}/json/`
 			);
 
 			if (response.data.erro) {
+				this.logManager.logError(`CEP não encontrado: ${formattedCep}`);
 				return {
 					error: "CEP não encontrado. Verifique o número e tente novamente.",
 				};
@@ -36,7 +38,7 @@ class ApiService {
 
 			return response.data;
 		} catch (error) {
-			this.logManager.logError(error.message);
+			this.logManager.logError(`Erro na consulta de CEP ${cep}: ${error.message}`);
 			throw new Error("Failed to fetch CEP data");
 		}
 	}
@@ -47,21 +49,30 @@ class ApiService {
 	 * @return {Promise<Object>} - As coordenadas geográficas da cidade
 	 * */
     async getCoordinates(city) {
-        const geoResponse = await axios.get('https://geocoding-api.open-meteo.com/v1/search', {
-            params: {
-                name: city,
-                count: 1,
-                language: 'pt',
-                format: 'json'
+        this.logManager.logAccess(`Buscando coordenadas para cidade: ${city}`);
+        
+        try {
+            const geoResponse = await axios.get('https://geocoding-api.open-meteo.com/v1/search', {
+                params: {
+                    name: city,
+                    count: 1,
+                    language: 'pt',
+                    format: 'json'
+                }
+            });
+
+            if (!geoResponse.data.results || geoResponse.data.results.length === 0) {
+                this.logManager.logError(`Cidade não encontrada: ${city}`);
+                return { error: 'Cidade não encontrada. Verifique o nome e tente novamente. ' };
             }
-        });
 
-        if (!geoResponse.data.results || geoResponse.data.results.length === 0) {
-            return { error: 'Cidade não encontrada. Verifique o nome e tente novamente. ' };
+            const { latitude, longitude } = geoResponse.data.results[0];
+            this.logManager.logAccess(`Coordenadas obtidas para ${city}: lat ${latitude}, long ${longitude}`);
+            return { latitude, longitude };
+        } catch (error) {
+            this.logManager.logError(`Erro ao buscar coordenadas para ${city}: ${error.message}`);
+            throw new Error(`Falha ao buscar coordenadas de: ${city}`);
         }
-
-        const { latitude, longitude } = geoResponse.data.results[0];
-        return { latitude, longitude };
     }
 
 	/**
@@ -72,6 +83,8 @@ class ApiService {
 	 * */
 	async getWeather(latitude, longitude) {
 		try {
+            this.logManager.logAccess(`Buscando dados climáticos para lat: ${latitude}, long: ${longitude}`);
+            
 			const weatherResponse = await axios.get(this.openMeteoBaseUrl, {
 				params: {
 					latitude,
@@ -83,10 +96,11 @@ class ApiService {
 				},
 			});
 
+            this.logManager.logAccess(`Dados climáticos obtidos com sucesso para lat: ${latitude}, long: ${longitude}`);
 			return weatherResponse.data;
 		} catch (error) {
-			console.error("Error fetching weather data:", error.message);
-			throw new Error("Failed to fetch weather data");
+			this.logManager.logError(`Erro ao obter dados climáticos: ${error.message}`);
+			throw new Error("Falha ao obter dados climáticos");
 		}
 	}
 }

@@ -59,6 +59,7 @@ class Chatbot {
 			chalk.bgBlueBright.bold("             CHATBOT             ")
 		);
 
+		this.logManager.logAccess("Chatbot iniciado");
 		this.stateManager.transition("GREETING");
 		this.processCurrentState();
 	}
@@ -75,6 +76,7 @@ class Chatbot {
 			handler();
 		} else {
 			console.log(chalk.red("Erro: Estado não encontrado!"));
+			this.logManager.logError(`Estado não encontrado: ${currentState}`);
 			this.close();
 		}
 	}
@@ -162,6 +164,8 @@ class Chatbot {
 			chalk.yellow("Escolha uma opção numérica: ")
 		);
 
+		this.logManager.logAccess(`Usuário selecionou a opção: ${option.trim()}`);
+
 		switch (option.trim()) {
 			case "1":
 				this.stateManager.transition("CEP_QUERY");
@@ -177,6 +181,7 @@ class Chatbot {
 					chalk.bgRedBright.bold("\n  Opção inválida!  ") +
 						" Tente novamente!"
 				);
+				this.logManager.logError(`Opção inválida selecionada: ${option.trim()}`);
 				await this.ask(
 					chalk.yellow("\nPressione ENTER para continuar...")
 				);
@@ -205,11 +210,13 @@ class Chatbot {
 			);
 
 			if (cep.toLowerCase() === "voltar") {
+				this.logManager.logAccess("Usuário solicitou retorno ao menu principal da consulta CEP");
 				this.stateManager.transition("MAIN_MENU");
 				this.processCurrentState();
 				return;
 			}
 
+			this.logManager.logAccess(`Usuário digitou o CEP: ${cep}`);
 			this.cepManager.validateCep(cep);
 
 			if (!this.cepManager.isValid) {
@@ -217,6 +224,7 @@ class Chatbot {
 					chalk.bgRedBright.bold("\n  CEP inválido!  ") +
 						" O CEP deve conter 8 dígitos numéricos."
 				);
+				this.logManager.logError(`CEP inválido digitado pelo usuário: ${cep}`);
 				await this.ask(
 					chalk.yellow("\nPressione ENTER para tentar novamente...")
 				);
@@ -233,12 +241,15 @@ class Chatbot {
 			
 			if(result.error) {
 				console.log(chalk.bgRedBright.bold("\n  CEP não encontrado!  ") + " Verifique os números e tente novamente.");
+				this.logManager.logError(`CEP não encontrado na API: ${this.cepManager.getCep()}`);
 				await this.ask(chalk.yellow("\nPressione ENTER para tentar novamente..."));
 				this.stateManager.transition("CEP_QUERY");
 				this.processCurrentState();
 				return;
 			}
 
+			this.logManager.logAccess(`Consulta de CEP bem-sucedida: ${this.cepManager.getCep()} - ${result.localidade}/${result.uf}`);
+			
 			console.log(chalk.bgGreenBright.bold("\n  Consulta realizada com sucesso!  ") + " - " + (result.cep || "Não informado"));
 			console.log(chalk.yellow("Logradouro: ") + (result.logradouro || "Não informado"));
 			console.log(chalk.yellow("Complemento: ") + (result.complemento || "Não informado"));
@@ -257,7 +268,7 @@ class Chatbot {
 				chalk.bgRedBright.bold(
 					"\n  Erro ao consultar o CEP.  ") + " Verifique sua conexão e tente novamente."
 				);
-			this.logManager.logError(error.message);
+			this.logManager.logError(`Erro na consulta de CEP: ${error.message}`);
 		}
 
 		await this.ask(chalk.yellow("\nPressione ENTER para continuar..."));
@@ -281,11 +292,13 @@ class Chatbot {
 			const city = await this.ask(chalk.yellow("Digite o nome da cidade ou 'voltar' para retornar ao menu: "));
 
 			if (city.toLowerCase() === 'voltar') {
+				this.logManager.logAccess("Usuário solicitou retorno ao menu principal da consulta de clima");
 				this.stateManager.transition('MAIN_MENU');
 				this.processCurrentState();
 				return;
 			}
 
+			this.logManager.logAccess(`Usuário consultou clima para cidade: ${city}`);
 			this.weatherManager.setCity(city);
 
 			await this.showLoadingAnimation("Consultando previsão do tempo, aguarde", 2000);
@@ -294,12 +307,16 @@ class Chatbot {
 
 			if(weatherData.error) {
 				console.log(chalk.bgRedBright.bold("\n  Cidade não encontrada!  ") + " Verifique o nome e tente novamente.");
+				this.logManager.logError(`Cidade não encontrada na consulta de clima: ${city}`);
+
 				await this.ask(chalk.yellow("\nPressione ENTER para tentar novamente..."));
+				
 				this.stateManager.transition('WEATHER_QUERY');
 				this.processCurrentState();
 				return;
 			}
 
+			this.logManager.logAccess(`Consulta de clima bem-sucedida para cidade: ${city}, temperatura: ${weatherData.current_temperature}°C`);
 			console.log(chalk.bgGreenBright.bold("\n  Consulta realizada com sucesso!  ") + " - " + this.weatherManager.getCity());
 
 			console.log(chalk.yellow("Temperatura atual: ") + (weatherData.current_temperature || "Não informado") + "°C");
@@ -309,7 +326,7 @@ class Chatbot {
 
 		}catch(error){
 			console.log(chalk.bgRedBright.bold("\n  Erro ao consultar a previsão do tempo.  ") + " Verifique sua conexão e tente novamente.");
-			this.logManager.logError(error);
+			this.logManager.logError(`Erro na consulta de clima: ${error.message || error}`);
 		}
 
 		await this.ask(chalk.yellow('\nPressione ENTER para continuar...'));
@@ -323,6 +340,7 @@ class Chatbot {
 	 * */
 	handleExit() {
 		console.log(chalk.green("\nObrigado por usar o Chatbot! Até logo!"));
+		this.logManager.logAccess("Usuário encerrou o chatbot");
 		this.close();
 	}
 
@@ -331,6 +349,7 @@ class Chatbot {
 	 * @return {void}
 	 * */
 	close() {
+		this.logManager.logAccess("Chatbot finalizado");
 		this.rl.close();
 		process.exit(0);
 	}
