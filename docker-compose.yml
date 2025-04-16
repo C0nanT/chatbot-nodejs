@@ -1,0 +1,13 @@
+services:
+  chatbot:
+    build: .
+    container_name: chatbot-nodejs
+    volumes:
+      - ./logs:/app/logs
+      - .:/app
+    stdin_open: true
+    tty: true
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=development
