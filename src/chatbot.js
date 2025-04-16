@@ -326,6 +326,10 @@ class Chatbot {
 		this.close();
 	}
 
+	/**
+	 * @description Encerra o Chatbot e fecha a interface readline
+	 * @return {void}
+	 * */
 	close() {
 		this.rl.close();
 		process.exit(0);
