@@ -15,20 +15,6 @@ class Chatbot {
 	}
 
 	/**
-	 * @description Inicializa o Chatbot e configura o primeiro estado, saudação
-	 * @return {void}
-	 * */
-	start() {
-		console.clear();
-		console.log(chalk.blue.bold("=================================="));
-		console.log(chalk.blue.bold("             CHATBOT"));
-		console.log(chalk.blue.bold("=================================="));
-
-		this.stateManager.transition("GREETING");
-		this.processCurrentState();
-	}
-
-	/**
 	 * @description Registra os estados e seus respectivos manipuladores
 	 * @return {void}
 	 * */
@@ -50,6 +36,20 @@ class Chatbot {
 			this.handleWeatherQuery.bind(this)
 		);
 		this.stateManager.registerHandler("EXIT", this.handleExit.bind(this));
+	}
+
+	/**
+	 * @description Inicializa o Chatbot e configura o primeiro estado, saudação
+	 * @return {void}
+	 * */
+	start() {
+		console.clear();
+		console.log(chalk.blue.bold("=================================="));
+		console.log(chalk.blue.bold("             CHATBOT"));
+		console.log(chalk.blue.bold("=================================="));
+
+		this.stateManager.transition("GREETING");
+		this.processCurrentState();
 	}
 
 	/**
