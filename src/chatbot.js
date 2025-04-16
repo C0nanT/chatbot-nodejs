@@ -82,7 +82,35 @@ class Chatbot {
 	}
 
 	/**
-	 * @description Manipulador para o estado de saudação
+	 * @description Exibe uma animação de carregamento no console
+	 * @param {string} message - A mensagem a ser exibida
+	 * @param {number} duration - A duração da animação em milissegundos
+	 * @return {Promise<void>} - Uma promise que é resolvida após a animação
+	 * */
+	showLoadingAnimation(message, duration = 2000) {
+		return new Promise((resolve) => {
+			const frames = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+			let i = 0;
+			process.stdout.write("\n");
+
+			const interval = setInterval(() => {
+				process.stdout.write(
+					`\r${chalk.cyan(frames[i++ % frames.length])} ${chalk.cyan(
+						message
+					)}`
+				);
+			}, 100);
+
+			setTimeout(() => {
+				clearInterval(interval);
+				process.stdout.write(
+					"\r" + " ".repeat(message.length + 10) + "\r"
+				);
+				resolve();
+			}, duration);
+		});
+	}
+
 	 * @return {void}
 	 * */
 	async handleGreeting() {
