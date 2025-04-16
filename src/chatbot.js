@@ -44,7 +44,9 @@ class Chatbot {
 	 * */
 	start() {
 		console.clear();
-		console.log(chalk.bgBlueBright.bold("             CHATBOT             "));
+		console.log(
+			chalk.bgBlueBright.bold("             CHATBOT             ")
+		);
 
 		this.stateManager.transition("GREETING");
 		this.processCurrentState();
@@ -85,7 +87,13 @@ class Chatbot {
 	 * */
 	async handleGreeting() {
 		console.log(chalk.green("\nOlá! Bem-vindo ao Chatbot!"));
-		console.log("Estou aqui para ajudar com consultas de " + chalk.yellow.underline("CEP") + " e " + chalk.yellow.underline("Clima") + ".\n");
+		console.log(
+			"Estou aqui para ajudar com consultas de " +
+				chalk.yellow.underline("CEP") +
+				" e " +
+				chalk.yellow.underline("Clima") +
+				".\n"
+		);
 
 		await this.ask(
 			chalk.yellow("Pressione a tecla ENTER para continuar...")
@@ -98,7 +106,42 @@ class Chatbot {
 	 * @description Manipulador para o estado do menu principal
 	 * @return {void}
 	 * */
-	handleMainMenu() {}
+	async handleMainMenu() {
+		console.clear();
+		console.log(
+			chalk.bgBlueBright.bold(
+				"             MENU PRINCIPAL             \n"
+			)
+		);
+		console.log("[1] Consultar CEP");
+		console.log("[2] Consultar previsão do tempo");
+		console.log("[9] Sair\n");
+
+		const option = await this.ask(
+			chalk.yellow("Escolha uma opção numérica: ")
+		);
+
+		switch (option.trim()) {
+			case "1":
+				this.stateManager.transition("CEP_QUERY");
+				break;
+			case "2":
+				this.stateManager.transition("WEATHER_QUERY");
+				break;
+			case "9":
+				this.stateManager.transition("EXIT");
+				break;
+			default:
+				console.log(
+					chalk.bgRedBright("\n  Opção inválida!  ") + chalk.whiteBright(" Tente novamente!")
+				);
+				await this.ask(
+					chalk.yellow("\nPressione ENTER para continuar...")
+				);
+		}
+
+		this.processCurrentState();
+	}
 
 	/**
 	 * @description Manipulador para o estado de consulta de CEP
