@@ -133,7 +133,7 @@ class Chatbot {
 	}
 
 	/**
-	 * @description Manipulador para o estado do menu principal
+	 * @description Manipulador para o estado do Menu Principal
 	 * @return {void}
 	 * */
 	async handleMainMenu() {
@@ -163,7 +163,8 @@ class Chatbot {
 				break;
 			default:
 				console.log(
-					chalk.bgRedBright("\n  Opção inválida!  ") + chalk.whiteBright(" Tente novamente!")
+					chalk.bgRedBright("\n  Opção inválida!  ") +
+						" Tente novamente!"
 				);
 				await this.ask(
 					chalk.yellow("\nPressione ENTER para continuar...")
