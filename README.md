@@ -1,13 +1,43 @@
+# Chatbot Node.js
 
-## execução com 100% Docker
+Um chatbot interativo de linha de comando que permite consultar informações de CEP e previsão do tempo.
+
+## Pré-requisitos
+
+- [Node.js](https://nodejs.org/) (v14 ou superior)
+
+  Ou
+
+- [Docker](https://www.docker.com/) (opcional, se desejar executar com Docker)
+
+## Opções de Execução
+
+### Execução com 100% Docker
+```bash
+# Construir a imagem do container
 docker compose build
+
+# Iniciar o container em modo detached
 docker compose up -d
+
+# Executar o aplicativo dentro do container
 docker exec -it chatbot-nodejs bash -c 'npm start'
+```
 
-## execução com 100% NodeJS
+### Execução com 100% NodeJS
+```bash
+# Instalar as dependências
 npm install
-npm start
 
-## execução com 50% NodeJS e 50% Docker
+# Iniciar o aplicativo
+npm start
+```
+
+### Execução Híbrida (50% NodeJS e 50% Docker)
+```bash
+# Instalar as dependências localmente
 npm i
+
+# Iniciar o container e executar o aplicativo
 npm run start:docker
+```
