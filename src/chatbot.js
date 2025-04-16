@@ -2,6 +2,9 @@ const readline = require("readline");
 const chalk = require("chalk");
 
 const { StateManager } = require("./managers/state-manager");
+const { CepManager } = require("./managers/cep-manager");
+const { LogManager } = require("./managers/log-manager");
+const { ApiService } = require("./services/api-service");
 
 class Chatbot {
 	constructor() {
@@ -10,8 +13,14 @@ class Chatbot {
 			output: process.stdout,
 		});
 
+		this.apiService = new ApiService();
+
 		this.stateManager = new StateManager();
 		this.setupStateHandlers();
+
+		this.cepManager = new CepManager();
+
+		this.logManager = new LogManager();
 	}
 
 	/**
@@ -163,7 +172,7 @@ class Chatbot {
 				break;
 			default:
 				console.log(
-					chalk.bgRedBright("\n  Opção inválida!  ") +
+					chalk.bgRedBright.bold("\n  Opção inválida!  ") +
 						" Tente novamente!"
 				);
 				await this.ask(
@@ -175,10 +184,84 @@ class Chatbot {
 	}
 
 	/**
-	 * @description Manipulador para o estado de consulta de CEP
+	 * @description Manipulador para o estado de Consulta de CEP
 	 * @return {void}
 	 * */
-	handleCepQuery() {}
+	async handleCepQuery() {
+		console.clear();
+		console.log(
+			chalk.bgBlueBright.bold(
+				"             CONSULTA DE CEP             \n"
+			)
+		);
+
+		try {
+			const cep = await this.ask(
+				chalk.yellow(
+					'Digite o CEP (apenas números) ou "voltar" para retornar ao menu: '
+				)
+			);
+
+			if (cep.toLowerCase() === "voltar") {
+				this.stateManager.transition("MAIN_MENU");
+				this.processCurrentState();
+				return;
+			}
+
+			this.cepManager.validateCep(cep);
+
+			if (!this.cepManager.isValid) {
+				console.log(
+					chalk.bgRedBright.bold("\n  CEP inválido!  ") +
+						" O CEP deve conter 8 dígitos numéricos."
+				);
+				await this.ask(
+					chalk.yellow("\nPressione ENTER para tentar novamente...")
+				);
+				this.stateManager.transition("CEP_QUERY");
+				this.processCurrentState();
+				return;
+			}
+
+			this.cepManager.setCep(cep);
+
+			await this.showLoadingAnimation("Consultando CEP, aguarde", 2000);
+
+			const result = await this.apiService.consultCep(this.cepManager.getCep());
+			
+			if(result.error) {
+				console.log(chalk.bgRedBright.bold("\n  CEP não encontrado!  ") + " Verifique os números e tente novamente.");
+				await this.ask(chalk.yellow("\nPressione ENTER para tentar novamente..."));
+				this.stateManager.transition("CEP_QUERY");
+				this.processCurrentState();
+				return;
+			}
+
+			console.log(chalk.bgGreenBright.bold("\n  Consulta realizada com sucesso!  ") + " - " + (result.cep || "Não informado"));
+			console.log(chalk.yellow("Logradouro: ") + (result.logradouro || "Não informado"));
+			console.log(chalk.yellow("Complemento: ") + (result.complemento || "Não informado"));
+			console.log(chalk.yellow("Unidade: ") + (result.unidade || "Não informado"));
+			console.log(chalk.yellow("Bairro: ") + (result.bairro || "Não informado"));
+			console.log(chalk.yellow("Cidade: ") + (result.localidade || "Não informado"));
+			console.log(chalk.yellow("Estado: ") + (result.estado || "Não informado") + " - " + (result.uf || "Não informado"));
+			console.log(chalk.yellow("Região: ") + (result.regiao || "Não informado"));
+			console.log(chalk.yellow("IBGE: ") + (result.ibge || "Não informado"));
+			console.log(chalk.yellow("GIA: ") + (result.gia || "Não informado"));
+			console.log(chalk.yellow("DDD: ") + (result.ddd || "Não informado"));
+			console.log(chalk.yellow("SIAFI: ") + (result.siafi || "Não informado"));
+
+		} catch (error) {
+			console.log(
+				chalk.bgRedBright.bold(
+					"\n  Erro ao consultar o CEP.  ") + " Verifique sua conexão e tente novamente."
+				);
+			this.logManager.logError(error.message);
+		}
+
+		await this.ask(chalk.yellow("\nPressione ENTER para continuar..."));
+		this.stateManager.transition("MAIN_MENU");
+		this.processCurrentState();
+	}
 
 	/**
 	 * @description Manipulador para o estado de consulta de clima
