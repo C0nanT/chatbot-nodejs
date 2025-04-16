@@ -3,6 +3,7 @@ const chalk = require("chalk");
 
 const { StateManager } = require("./managers/state-manager");
 const { CepManager } = require("./managers/cep-manager");
+const { WeatherManager } = require("./managers/weather-manager");
 const { LogManager } = require("./managers/log-manager");
 const { ApiService } = require("./services/api-service");
 
@@ -19,6 +20,7 @@ class Chatbot {
 		this.setupStateHandlers();
 
 		this.cepManager = new CepManager();
+		this.weatherManager = new WeatherManager();
 
 		this.logManager = new LogManager();
 	}
@@ -267,7 +269,53 @@ class Chatbot {
 	 * @description Manipulador para o estado de consulta de clima
 	 * @return {void}
 	 * */
-	handleWeatherQuery() {}
+	async handleWeatherQuery() {
+		console.clear();
+		console.log(
+			chalk.bgBlueBright.bold(
+				"             CONSULTA DE PREVISÃO DO TEMPO             \n"
+			)
+		);
+
+		try{
+			const city = await this.ask(chalk.yellow("Digite o nome da cidade ou 'voltar' para retornar ao menu: "));
+
+			if (city.toLowerCase() === 'voltar') {
+				this.stateManager.transition('MAIN_MENU');
+				this.processCurrentState();
+				return;
+			}
+
+			this.weatherManager.setCity(city);
+
+			await this.showLoadingAnimation("Consultando previsão do tempo, aguarde", 2000);
+
+			const weatherData = await this.weatherManager.getWeatherData();
+
+			if(weatherData.error) {
+				console.log(chalk.bgRedBright.bold("\n  Cidade não encontrada!  ") + " Verifique o nome e tente novamente.");
+				await this.ask(chalk.yellow("\nPressione ENTER para tentar novamente..."));
+				this.stateManager.transition('WEATHER_QUERY');
+				this.processCurrentState();
+				return;
+			}
+
+			console.log(chalk.bgGreenBright.bold("\n  Consulta realizada com sucesso!  ") + " - " + this.weatherManager.getCity());
+
+			console.log(chalk.yellow("Temperatura atual: ") + (weatherData.current_temperature || "Não informado") + "°C");
+			console.log(chalk.yellow("Temperatura máxima: ") + (weatherData.max_temperature || "Não informado") + "°C");
+			console.log(chalk.yellow("Temperatura mínima: ") + (weatherData.min_temperature || "Não informado") + "°C");
+			console.log(chalk.yellow("Condição: ") + (weatherData.condition || "Não informado"));
+
+		}catch(error){
+			console.log(chalk.bgRedBright.bold("\n  Erro ao consultar a previsão do tempo.  ") + " Verifique sua conexão e tente novamente.");
+			this.logManager.logError(error);
+		}
+
+		await this.ask(chalk.yellow('\nPressione ENTER para continuar...'));
+		this.stateManager.transition('WEATHER_QUERY');
+		this.processCurrentState();
+	}
 
 	/**
 	 * @description Manipulador para o estado de saída
