@@ -241,7 +241,6 @@ class Chatbot {
 			
 			if(result.error) {
 				console.log(chalk.bgRedBright.bold("\n  CEP não encontrado!  ") + " Verifique os números e tente novamente.");
-				this.logManager.logError(`CEP não encontrado na API: ${this.cepManager.getCep()}`);
 				await this.ask(chalk.yellow("\nPressione ENTER para tentar novamente..."));
 				this.stateManager.transition("CEP_QUERY");
 				this.processCurrentState();
@@ -272,7 +271,7 @@ class Chatbot {
 		}
 
 		await this.ask(chalk.yellow("\nPressione ENTER para continuar..."));
-		this.stateManager.transition("MAIN_MENU");
+		this.stateManager.transition("CEP_QUERY");
 		this.processCurrentState();
 	}
 
@@ -307,7 +306,6 @@ class Chatbot {
 
 			if(weatherData.error) {
 				console.log(chalk.bgRedBright.bold("\n  Cidade não encontrada!  ") + " Verifique o nome e tente novamente.");
-				this.logManager.logError(`Cidade não encontrada na consulta de clima: ${city}`);
 
 				await this.ask(chalk.yellow("\nPressione ENTER para tentar novamente..."));
 				

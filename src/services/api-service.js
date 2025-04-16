@@ -62,12 +62,11 @@ class ApiService {
             });
 
             if (!geoResponse.data.results || geoResponse.data.results.length === 0) {
-                this.logManager.logError(`Cidade não encontrada: ${city}`);
                 return { error: 'Cidade não encontrada. Verifique o nome e tente novamente. ' };
             }
 
             const { latitude, longitude } = geoResponse.data.results[0];
-            this.logManager.logAccess(`Coordenadas obtidas para ${city}: lat ${latitude}, long ${longitude}`);
+ 
             return { latitude, longitude };
         } catch (error) {
             this.logManager.logError(`Erro ao buscar coordenadas para ${city}: ${error.message}`);

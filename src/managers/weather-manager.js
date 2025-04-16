@@ -65,7 +65,6 @@ class WeatherManager {
                 is_night: is_night,
             };
 
-            this.logManager.logAccess(`Consulta de clima concluída com sucesso para: ${this.getCity()}`);
             return weather;
         } catch (error) {
             this.logManager.logError(`Erro na consulta de clima: ${error.message}`);
