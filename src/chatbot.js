@@ -85,7 +85,16 @@ class Chatbot {
 	 * @description Manipulador para o estado de saudação
 	 * @return {void}
 	 * */
-	handleGreeting() {}
+	async handleGreeting() {
+		console.log(chalk.green("\nOlá! Bem-vindo ao Chatbot!"));
+		console.log("Estou aqui para ajudar com consultas de " + chalk.yellow.underline("CEP") + " e " + chalk.yellow.underline("Clima") + ".\n");
+
+		await this.ask(
+			chalk.yellow("Pressione a tecla ENTER para continuar...")
+		);
+		this.stateManager.transition("MAIN_MENU");
+		this.processCurrentState();
+	}
 
 	/**
 	 * @description Manipulador para o estado do menu principal
