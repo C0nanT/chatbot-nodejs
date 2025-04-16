@@ -25,7 +25,7 @@ class LogManager {
     }
 
     logError(errorMessage) {
-        const logEntry = `[${new Date().toISOString()}] - ERROR: ${errorMessage}\n`;
+        const logEntry = `[${new Date().toISOString()}] - ${errorMessage}\n`;
         fs.appendFileSync('logs/errors.log', logEntry);
     }
 }
