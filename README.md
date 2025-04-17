@@ -12,6 +12,8 @@ Um chatbot interativo de linha de comando que permite consultar informações de
 
 ## Opções de Execução
 
+> **⚠️ ATENÇÃO:** Escolha apenas UMA das opções de execução abaixo. Tentar mais de uma pode causar conflitos de porta, rede ou permissões no WSL.
+
 ### Execução com 100% Docker
 ```bash
 # Construir a imagem do container
