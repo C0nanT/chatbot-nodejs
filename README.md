@@ -4,7 +4,7 @@ Um chatbot interativo de linha de comando que permite consultar informações de
 
 ## Pré-requisitos
 
-- [Node.js](https://nodejs.org/) (v18+)
+- [Node.js](https://nodejs.org/) (recomendado: v18+)
 
   Ou
 
